@@ -1,8 +1,8 @@
 # pymol-iellipsoid
-Pymol plugin allowing to evaluate and draw inertia ellipsoid for a selection. Useful to demonstrate mobility of an atom.
+Pymol plugin allowing to evaluate and draw inertia ellipsoid for a selection.
+Useful to demonstrate mobility of atoms.
 
-Example usage:
-```
-select a1, id 1
-iellipsoid sele=a1
-```
+Interface:
+* `ie_build` build a single ellipsoid for a selection
+* `ie_build_all` build ellipsoid for each atom ID
+* `ie_build_file` load PDB, align, and apply `ie_build_all` to it

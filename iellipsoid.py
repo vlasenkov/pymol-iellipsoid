@@ -20,7 +20,7 @@ def vertex(a1, a2, a3, u, v, M, r0):
     return vrtx + r0, nrml
 
 
-def iellipsoid(sele, name='iellipsoid', col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12, scale=0.0004):
+def ie_build(sele, name='iellipsoid', col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12, scale=0.0004):
     data = cmd.get_coords(sele)
     
     r0 = data.mean(axis=0)
@@ -66,4 +66,26 @@ def iellipsoid(sele, name='iellipsoid', col=[0.5, 0.5, 0.5], u_segs=12, v_segs=1
     cmd.load_cgo(mesh, name)
 
 
-cmd.extend('iellipsoid', iellipsoid)
+def ie_build_all(col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12, scale=0.0004):
+    target = cmd.get_names()[0]
+    command = 'cmd.select("atom_group_%d" % ID, "id %d" % ID); ie_build("atom_group_%d" % ID, "ellipsoid_%d" % ID)'
+    cmd.iterate(target, command)
+
+
+def ie_build_file(fname, align=True, ortho=True, hide=True, col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12, scale=0.0004):
+    if ortho:
+        cmd.set('orthoscopic', 'true')
+    cmd.load(fname)
+    if align:
+        object_list = cmd.get_names()
+        target = object_list.pop()
+        for obj in object_list:
+            cmd.align(obj, target)
+    if hide:
+        cmd.hide('everything')
+    ie_build_all(col, u_segs, v_segs, scale)
+
+
+cmd.extend('ie_build', ie_build)
+cmd.extend('ie_build_all', ie_build_all)
+cmd.extend('ie_build_file', ie_build_file)
