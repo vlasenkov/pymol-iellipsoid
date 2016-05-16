@@ -20,7 +20,8 @@ def vertex(a1, a2, a3, u, v, M, r0):
     return vrtx + r0, nrml
 
 
-def ie_build(sele, name='iellipsoid', col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12, scale=0.0004):
+def ie_build(sele, name='iellipsoid', col=[0.5, 0.5, 0.5], u_segs=12,
+             v_segs=12, scale=0.0004):
     data = cmd.get_coords(sele)
     
     r0 = data.mean(axis=0)
@@ -47,10 +48,15 @@ def ie_build(sele, name='iellipsoid', col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12,
         V = math.pi
         for X in range(0, v_segs):
 
-            (x1, y1, z1), (n1x, n1y, n1z) = vertex(a1, a2, a3, U, V, M, r0)
-            (x2, y2, z2), (n2x, n2y, n2z) = vertex(a1, a2, a3, U + dU, V, M, r0)
-            (x3, y3, z3), (n3x, n3y, n3z) = vertex(a1, a2, a3, U + dU, V + dV, M, r0)
-            (x4, y4, z4), (n4x, n4y, n4z) = vertex(a1, a2, a3, U, V + dV, M, r0)
+            (x1, y1, z1), (n1x, n1y, n1z) = vertex(a1, a2, a3,
+                                                   U, V, M, r0)
+            (x2, y2, z2), (n2x, n2y, n2z) = vertex(a1, a2, a3,
+                                                   U + dU, V, M, r0)
+            (x3, y3, z3), (n3x, n3y, n3z) = vertex(a1, a2, a3,
+                                                   U + dU, V + dV,
+                                                   M, r0)
+            (x4, y4, z4), (n4x, n4y, n4z) = vertex(a1, a2, a3,
+                                                   U, V + dV, M, r0)
 
             mesh.extend([NORMAL, n1x, n1y, n1z, VERTEX, x1, y1, z1])
             mesh.extend([NORMAL, n2x, n2y, n2z, VERTEX, x2, y2, z2])
@@ -62,17 +68,21 @@ def ie_build(sele, name='iellipsoid', col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12,
             V += dV
         U += dU
     mesh.append(END)
-
     cmd.load_cgo(mesh, name)
 
 
-def ie_build_all(col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12, scale=0.0004):
+def ie_build_all(col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12,
+                 scale=0.0004):
     target = cmd.get_names()[0]
-    command = 'cmd.select("atom_group_%d" % ID, "id %d" % ID); ie_build("atom_group_%d" % ID, "ellipsoid_%d" % ID)'
-    cmd.iterate(target, command)
+    command = 'cmd.select("atom_group_%d" % ID, "id %d" % ID);'\
+              'ie_build("atom_group_%d" % ID, "ellipsoid_%d" % ID)'
+    cmd.iterate(target, command,
+                space={'ie_build': ie_build, 'cmd': cmd})
 
 
-def ie_build_file(fname, align=True, ortho=True, hide=True, col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12, scale=0.0004):
+def ie_build_file(fname, align=True, ortho=True, hide=True,
+                  col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12,
+                  scale=0.0004):
     if ortho:
         cmd.set('orthoscopic', 'true')
     cmd.load(fname)
