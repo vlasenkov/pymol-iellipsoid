@@ -86,20 +86,26 @@ def ie_build_all(col='[0.5, 0.5, 0.5]', scale='1'):
                        'scale': scale})
 
 
-def ie_build_file(fname, align=True, ortho=True, hide=True, zoom=True,
-                  col='[0.5, 0.5, 0.5]', scale='1'):
-    if ortho:
+def to_bool(value):
+    if value == 'true':
+        return True
+    return False
+
+
+def ie_build_file(fname, align='true', ortho='true', hide='true',
+                  zoom='true', col='[0.5, 0.5, 0.5]', scale='1'):
+    if to_bool(ortho):
         cmd.set('orthoscopic', 'true')
     cmd.load(fname)
-    if align:
+    if to_bool(align):
         object_list = cmd.get_names()
         target = object_list.pop()
         for obj in object_list:
             cmd.align(obj, target)
-    if hide:
+    if to_bool(hide):
         cmd.hide('everything')
     ie_build_all(col, scale)
-    if zoom:
+    if to_bool(zoom):
         cmd.zoom()
 
 
