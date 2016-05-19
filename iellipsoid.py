@@ -20,10 +20,12 @@ def vertex(a1, a2, a3, u, v, M, r0):
     return vrtx + r0, nrml
 
 
-def ie_build(sele, name='iellipsoid', col=[0.5, 0.5, 0.5], u_segs=12,
-             v_segs=12, scale=0.0004):
-    data = cmd.get_coords(sele)
-    
+def ie_build(sele, name='iellipsoid', col='[0.5, 0.5, 0.5]', scale='1'):
+    # data = cmd.get_coords(sele)  # only for 1.7.4 and higher
+    data = np.array(cmd.get_model(sele, 1).get_coord_list())
+    col = eval(col, {'__builtins__': None}, {})
+    scale = float(scale) * 0.0001
+
     r0 = data.mean(axis=0)
     x, y, z = (data - r0).transpose()
     Jxx = sum(y ** 2 + z ** 2)
@@ -39,6 +41,8 @@ def ie_build(sele, name='iellipsoid', col=[0.5, 0.5, 0.5], u_segs=12,
     M = linalg.inv(vs)
     a1, a2, a3 = ws * scale
 
+    u_segs = 12
+    v_segs = 12
     mesh = [BEGIN, TRIANGLES, COLOR]
     mesh.extend(col)
     dU = math.pi / u_segs
@@ -71,18 +75,19 @@ def ie_build(sele, name='iellipsoid', col=[0.5, 0.5, 0.5], u_segs=12,
     cmd.load_cgo(mesh, name)
 
 
-def ie_build_all(col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12,
-                 scale=0.0004):
+def ie_build_all(col='[0.5, 0.5, 0.5]', scale='1'):
     target = cmd.get_names()[0]
     command = 'cmd.select("atom_group_%d" % ID, "id %d" % ID);'\
-              'ie_build("atom_group_%d" % ID, "ellipsoid_%d" % ID)'
+        'ie_build("atom_group_%d" % ID, "ellipsoid_%d" % ID, col, scale)'
     cmd.iterate(target, command,
-                space={'ie_build': ie_build, 'cmd': cmd})
+                space={'ie_build': ie_build,
+                       'cmd': cmd,
+                       'col': col,
+                       'scale': scale})
 
 
-def ie_build_file(fname, align=True, ortho=True, hide=True,
-                  col=[0.5, 0.5, 0.5], u_segs=12, v_segs=12,
-                  scale=0.0004):
+def ie_build_file(fname, align=True, ortho=True, hide=True, zoom=True,
+                  col='[0.5, 0.5, 0.5]', scale='1'):
     if ortho:
         cmd.set('orthoscopic', 'true')
     cmd.load(fname)
@@ -93,7 +98,9 @@ def ie_build_file(fname, align=True, ortho=True, hide=True,
             cmd.align(obj, target)
     if hide:
         cmd.hide('everything')
-    ie_build_all(col, u_segs, v_segs, scale)
+    ie_build_all(col, scale)
+    if zoom:
+        cmd.zoom()
 
 
 cmd.extend('ie_build', ie_build)
